@@ -41,7 +41,11 @@ npm run lint
 
 ### GitHub Pages로 배포
 
-`main`에 푸시하면 `.github/workflows/deploy-pages.yml`이 빌드해 배포합니다. 워크플로가 Pages를 자동으로 켜도록(`enablement: true`) 되어 있지만, 실패하면 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 한 번 설정해 주세요. (Actions 탭에서 수동 실행도 가능)
+배포 워크플로(`.github/workflows/deploy-pages.yml`)는 `main` 푸시마다 빌드해 배포합니다. 다만 **Pages 자체를 켜는 일은 저장소 소유자만 할 수 있습니다** — Actions 토큰으로는 Pages 사이트를 만들 수 없고(`Resource not accessible by integration`), `gh-pages` 브랜치를 올려도 자동으로 켜지지 않습니다.
+
+한 번만 해주세요: 저장소 **Settings → Pages → Build and deployment → Source**를 **GitHub Actions**로 선택합니다. 그 다음 Actions 탭에서 **Deploy to GitHub Pages**를 실행하거나 `main`에 푸시하면 `https://<계정>.github.io/philosopher/`에 배포됩니다. 비공개 저장소는 GitHub Pro 이상에서만 Pages를 쓸 수 있으니, 무료 플랜이면 저장소를 공개로 바꾸는 방법도 있습니다(키는 저장소에 없습니다).
+
+대안으로 `gh-pages` 브랜치에 최신 빌드가 올라가 있으니, Source를 **Deploy from a branch → gh-pages**로 골라도 바로 서비스됩니다.
 
 ## AI 연결
 
