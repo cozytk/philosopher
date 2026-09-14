@@ -135,5 +135,7 @@ describe('chat client', () => {
   it('turns HTTP errors into readable messages', async () => {
     vi.stubGlobal('fetch', async () => new Response('nope', { status: 401 }))
     await expect(chat(cfg, { messages: [{ role: 'user', content: 'x' }] })).rejects.toThrow(/401/)
+    vi.stubGlobal('fetch', async () => new Response('{"error":{"message":"This model requires you to complete the following before use: 18+ age confirmation.","metadata":{"missing_attestation_types":["age_18plus"]}}}', { status: 403 }))
+    await expect(chat(cfg, { messages: [{ role: 'user', content: 'x' }] })).rejects.toThrow(/18세/)
   })
 })

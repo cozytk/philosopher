@@ -46,7 +46,10 @@ function friendly(status: number, body: string, provider: ProviderConfig['provid
   const snippet = body.replace(/\s+/g, ' ').slice(0, 240)
   if (status === 401) return provider === 'custom' ? `인증 실패(401). 엔드포인트가 키를 요구하는지 확인하세요. ${snippet}` : `API 키가 유효하지 않습니다(401). 설정에서 키를 확인하세요.`
   if (status === 402) return '크레딧이 부족합니다(402). 제공자 계정에 잔액을 충전하세요.'
-  if (status === 403) return `접근이 거부되었습니다(403). ${snippet}`
+  if (status === 403) {
+    if (/attestation|18\+|age_18/i.test(body)) return '이 모델은 OpenRouter에서 18세 이상 확인이 필요해요. openrouter.ai/settings/preferences 에서 확인한 뒤 다시 시도하세요.'
+    return `접근이 거부되었습니다(403). ${snippet}`
+  }
   if (status === 404) return `모델 또는 엔드포인트를 찾을 수 없습니다(404). 모델 id를 확인하세요. ${snippet}`
   if (status === 429) return '요청이 너무 잦습니다(429). 잠시 후 다시 시도하세요. 무료 모델은 분당/일일 한도가 있습니다.'
   if (status >= 500) return `제공자 서버 오류(${status}). 잠시 후 다시 시도하세요.`
