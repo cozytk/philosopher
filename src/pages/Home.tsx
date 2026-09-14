@@ -66,8 +66,8 @@ export default function HomePage() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-line pt-4 sm:grid-cols-4">
-            <Meter label="넓이 · 답한 질문" value={overall.components.coverage} hint="영역별 질문 사다리를 얼마나 밟았는가" />
-            <Meter label="깊이 · 구체와 근거" value={overall.components.depth} hint="장면·이유·구조·자기 질문이 있는가" />
+            <Meter label="넓이 · 질문" value={overall.components.coverage} hint="영역별 질문 사다리를 얼마나 밟았는가" />
+            <Meter label="깊이 · 근거" value={overall.components.depth} hint="장면·이유·구조·자기 질문이 있는가" />
             <Meter label="다양성 · 관점" value={overall.components.exploration} hint="다른 관점과 반론을 얼마나 만났는가" />
             <Meter label="확립 · 입장" value={overall.components.commitment} hint="한 문장 입장과 확신도" />
           </div>
