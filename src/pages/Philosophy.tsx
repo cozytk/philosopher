@@ -112,7 +112,7 @@ export default function PhilosophyPage() {
   )
   const aiEstimate = useMemo(() => {
     const tokens = estimateTokens(buildSynthesisMessages(synthesisInput).map((m) => m.content).join('\n'))
-    return estimateCostUsd(price, tokens, 1500)
+    return estimateCostUsd(price, tokens, 4000)
   }, [synthesisInput, price])
 
   function insertCompiled() {
