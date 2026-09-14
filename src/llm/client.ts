@@ -67,7 +67,15 @@ interface Attempt {
   useJson: boolean
   useTemperature: boolean
   maxParam: 'max_tokens' | 'max_completion_tokens'
+  /** OpenRouter: bound hidden reasoning so it cannot eat the whole output budget. */
+  useReasoning: boolean
+  /** OpenRouter: prefer the fastest provider for the model. */
+  useProviderPrefs: boolean
+  maxTokens?: number
+  retriedEmpty: boolean
 }
+
+const MAX_OUTPUT_TOKENS = 8000
 
 /** Chat-completions call that works against OpenRouter, OpenAI, or any compatible endpoint. */
 export async function chat(config: ProviderConfig, opts: ChatOptions): Promise<ChatResult> {
@@ -78,18 +86,26 @@ export async function chat(config: ProviderConfig, opts: ChatOptions): Promise<C
     useJson: Boolean(opts.json),
     useTemperature: typeof opts.temperature === 'number',
     maxParam: config.provider === 'openai' ? 'max_completion_tokens' : 'max_tokens',
+    useReasoning: config.provider === 'openrouter',
+    useProviderPrefs: config.provider === 'openrouter',
+    maxTokens: opts.maxTokens,
+    retriedEmpty: false,
   }
 
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 7; i++) {
     const body: Record<string, unknown> = {
       model: config.model,
       messages: opts.messages,
       stream,
     }
-    if (opts.maxTokens) body[attempt.maxParam] = opts.maxTokens
+    if (attempt.maxTokens) body[attempt.maxParam] = attempt.maxTokens
     if (attempt.useTemperature) body.temperature = opts.temperature
     if (attempt.useJson) body.response_format = { type: 'json_object' }
-    if (config.provider === 'openrouter') body.usage = { include: true }
+    if (config.provider === 'openrouter') {
+      body.usage = { include: true }
+      if (attempt.useReasoning) body.reasoning = { effort: 'low', exclude: true }
+      if (attempt.useProviderPrefs) body.provider = { sort: 'throughput' }
+    }
     if (stream && config.provider !== 'openrouter') body.stream_options = { include_usage: true }
 
     const res = await fetch(url, { method: 'POST', headers: buildHeaders(config), body: JSON.stringify(body), signal: opts.signal })
@@ -109,10 +125,28 @@ export async function chat(config: ProviderConfig, opts: ChatOptions): Promise<C
         attempt = { ...attempt, maxParam: attempt.maxParam === 'max_tokens' ? 'max_completion_tokens' : 'max_tokens' }
         continue
       }
+      if (res.status === 400 && attempt.useReasoning && /reasoning/.test(lower)) {
+        attempt = { ...attempt, useReasoning: false }
+        continue
+      }
+      if (res.status === 400 && attempt.useProviderPrefs && /provider/.test(lower)) {
+        attempt = { ...attempt, useProviderPrefs: false }
+        continue
+      }
       throw new LlmError(friendly(res.status, text, config.provider), res.status)
     }
 
     const result = stream ? await readStream(res, opts.onToken!) : await readJson(res)
+    if (!result.text.trim()) {
+      // Reasoning models can spend the whole budget thinking and return nothing visible.
+      const budget = attempt.maxTokens
+      const limitHit = result.finishReason === 'length' || (budget ? result.usage.completionTokens >= budget * 0.9 : false)
+      if (budget && limitHit && !attempt.retriedEmpty && budget < MAX_OUTPUT_TOKENS) {
+        attempt = { ...attempt, retriedEmpty: true, maxTokens: Math.min(MAX_OUTPUT_TOKENS, budget * 2) }
+        continue
+      }
+      throw new LlmError('모델이 빈 답을 보냈어요. 추론(생각) 토큰이 출력 한도를 다 썼을 수 있습니다. 다시 시도하거나 설정에서 다른 모델을 골라보세요.')
+    }
     const usage: ChatUsage = {
       promptTokens: result.usage.promptTokens,
       completionTokens: result.usage.completionTokens,
@@ -137,20 +171,28 @@ function parseUsage(u: RawUsage | undefined): ChatUsage {
   }
 }
 
-async function readJson(res: Response): Promise<{ text: string; model: string; usage: ChatUsage }> {
+interface ReadResult {
+  text: string
+  model: string
+  usage: ChatUsage
+  finishReason?: string
+}
+
+async function readJson(res: Response): Promise<ReadResult> {
   const json = (await res.json()) as {
     model?: string
-    choices?: { message?: { content?: string | { text?: string }[] } }[]
+    choices?: { message?: { content?: string | { text?: string }[] }; finish_reason?: string | null }[]
     usage?: RawUsage
     error?: { message?: string }
   }
   if (json.error?.message) throw new LlmError(json.error.message)
-  const raw = json.choices?.[0]?.message?.content
+  const choice = json.choices?.[0]
+  const raw = choice?.message?.content
   const text = typeof raw === 'string' ? raw : Array.isArray(raw) ? raw.map((p) => p.text ?? '').join('') : ''
-  return { text, model: json.model ?? '', usage: parseUsage(json.usage) }
+  return { text, model: json.model ?? '', usage: parseUsage(json.usage), finishReason: choice?.finish_reason ?? undefined }
 }
 
-async function readStream(res: Response, onToken: (t: string) => void): Promise<{ text: string; model: string; usage: ChatUsage }> {
+async function readStream(res: Response, onToken: (t: string) => void): Promise<ReadResult> {
   const reader = res.body?.getReader()
   if (!reader) throw new LlmError('스트리밍 응답을 읽을 수 없습니다.')
   const decoder = new TextDecoder()
@@ -158,6 +200,7 @@ async function readStream(res: Response, onToken: (t: string) => void): Promise<
   let text = ''
   let model = ''
   let usage: ChatUsage = { promptTokens: 0, completionTokens: 0 }
+  let finishReason: string | undefined
   let done = false
   while (!done) {
     const { value, done: d } = await reader.read()
@@ -183,11 +226,13 @@ async function readStream(res: Response, onToken: (t: string) => void): Promise<
         }
         if (chunk.error?.message) throw new LlmError(chunk.error.message)
         if (chunk.model) model = chunk.model
-        const delta = chunk.choices?.[0]?.delta?.content
+        const choice = chunk.choices?.[0]
+        const delta = choice?.delta?.content
         if (delta) {
           text += delta
           onToken(delta)
         }
+        if (choice?.finish_reason) finishReason = choice.finish_reason
         if (chunk.usage) usage = parseUsage(chunk.usage)
       } catch (e) {
         if (e instanceof LlmError) throw e
@@ -195,14 +240,14 @@ async function readStream(res: Response, onToken: (t: string) => void): Promise<
       }
     }
   }
-  return { text, model, usage }
+  return { text, model, usage, finishReason }
 }
 
 /** Quick connectivity/authorization check used by the settings page. */
 export async function testConnection(config: ProviderConfig, price?: Price): Promise<ChatResult> {
   return chat(config, {
     messages: [{ role: 'user', content: '한 단어로만 답하세요: 준비됐나요?' }],
-    maxTokens: 16,
+    maxTokens: 200,
     price,
   })
 }

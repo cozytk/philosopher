@@ -67,7 +67,7 @@ export function ReflectPanel({
   const reflectEstimate = useMemo(() => {
     const msgs = buildReflectMessages({ question, answer, candidates, related })
     const tokens = estimateTokens(msgs.map((m) => m.content).join('\n'))
-    return { tokens, cost: estimateCostUsd(price, tokens, 900) }
+    return { tokens, cost: estimateCostUsd(price, tokens, 2400) }
   }, [question, answer, candidates, related, price])
 
   const messages = useMemo(() => dialogues[question.id] ?? EMPTY_MESSAGES, [dialogues, question.id])
@@ -100,7 +100,7 @@ export function ReflectPanel({
   const dialogueEstimate = useMemo(() => {
     const msgs = buildDialogueMessages({ question, answer, candidates, history: messages.map((m) => ({ role: m.role, content: m.content })), userMessage: draft || '…' })
     const tokens = estimateTokens(msgs.map((m) => m.content).join('\n'))
-    return estimateCostUsd(price, tokens, 300)
+    return estimateCostUsd(price, tokens, 800)
   }, [question, answer, candidates, messages, draft, price])
 
   if (!configured) {
@@ -126,6 +126,7 @@ export function ReflectPanel({
             <div className="text-[11px] text-ink-3">
               {fresh ? `최신 (${formatDate(reflection!.at, true)})` : reflection ? '글이 바뀌었어요 — 다시 받을 수 있어요' : '한 번의 호출로 전제·질문·긴장·관점을 받아요'}
               {' · '}예상 ≤ {formatUsd(reflectEstimate.cost)}
+              {busy === 'reflect' ? ' · 읽는 중이에요. 추론 모델은 1~2분 걸리기도 해요.' : ''}
             </div>
           </div>
           <button type="button" className="btn-primary" onClick={doReflect} disabled={busy !== null || fresh || !enoughText} title={!enoughText ? '먼저 글을 조금 더 써주세요 (60자 이상)' : ''}>

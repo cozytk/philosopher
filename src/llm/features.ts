@@ -16,7 +16,7 @@ const REFLECT_TYPES = new Set(['clarify', 'assumption', 'evidence', 'perspective
 
 export async function reflectOnAnswer(config: ProviderConfig, input: ReflectInput, price?: Price, signal?: AbortSignal): Promise<FeatureResult<Reflection>> {
   const messages = buildReflectMessages(input)
-  const res = await chat(config, { messages, maxTokens: 1100, temperature: 0.4, json: true, price, signal })
+  const res = await chat(config, { messages, maxTokens: 2400, temperature: 0.4, json: true, price, signal })
   const raw = extractJson<Record<string, unknown>>(res.text)
   const candidateIds = new Set(input.candidates.map((c) => c.id))
   const relatedIds = new Set(input.related.map((r) => r.questionId))
@@ -82,13 +82,13 @@ export async function dialogueTurn(
   signal?: AbortSignal,
 ): Promise<FeatureResult<string>> {
   const messages = buildDialogueMessages(input)
-  const res = await chat(config, { messages, maxTokens: 400, temperature: 0.7, onToken, price, signal })
+  const res = await chat(config, { messages, maxTokens: 800, temperature: 0.7, onToken, price, signal })
   return { data: res.text.trim(), usage: res.usage, model: res.model }
 }
 
 export async function synthesizePhilosophy(config: ProviderConfig, input: SynthesisInput, price?: Price, signal?: AbortSignal): Promise<FeatureResult<string>> {
   const messages = buildSynthesisMessages(input)
-  const res = await chat(config, { messages, maxTokens: 1800, temperature: 0.5, price, signal })
+  const res = await chat(config, { messages, maxTokens: 4000, temperature: 0.5, price, signal })
   let md = res.text.trim()
   const fenced = md.match(/^```(?:markdown|md)?\s*([\s\S]*?)```$/i)
   if (fenced) md = fenced[1].trim()

@@ -99,6 +99,39 @@ describe('chat client', () => {
     expect(res.usage.costUsd).toBeCloseTo(0.003, 6)
   })
 
+  it('sends bounded reasoning and throughput routing to OpenRouter, dropping them if rejected', async () => {
+    const bodies: Record<string, unknown>[] = []
+    vi.stubGlobal('fetch', async (_url: string, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body)) as Record<string, unknown>
+      bodies.push(body)
+      if (body.reasoning) return new Response('{"error":{"message":"reasoning is not supported for this model"}}', { status: 400 })
+      return new Response(JSON.stringify({ choices: [{ message: { content: 'ok' }, finish_reason: 'stop' }], usage: { prompt_tokens: 1, completion_tokens: 1 } }), { status: 200 })
+    })
+    const res = await chat(cfg, { messages: [{ role: 'user', content: 'x' }], maxTokens: 100 })
+    expect(res.text).toBe('ok')
+    expect(bodies[0].reasoning).toEqual({ effort: 'low', exclude: true })
+    expect(bodies[0].provider).toEqual({ sort: 'throughput' })
+    expect(bodies[1].reasoning).toBeUndefined()
+  })
+
+  it('retries once with a bigger budget when a reasoning model returns nothing visible', async () => {
+    const budgets: number[] = []
+    vi.stubGlobal('fetch', async (_url: string, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body)) as { max_tokens: number }
+      budgets.push(body.max_tokens)
+      if (budgets.length === 1) return new Response(JSON.stringify({ choices: [{ message: { content: '' }, finish_reason: 'length' }], usage: { prompt_tokens: 10, completion_tokens: 500 } }), { status: 200 })
+      return new Response(JSON.stringify({ choices: [{ message: { content: '# 초안' }, finish_reason: 'stop' }], usage: { prompt_tokens: 10, completion_tokens: 900 } }), { status: 200 })
+    })
+    const res = await chat(cfg, { messages: [{ role: 'user', content: 'x' }], maxTokens: 500 })
+    expect(budgets).toEqual([500, 1000])
+    expect(res.text).toBe('# 초안')
+  })
+
+  it('reports an empty reply clearly after the retry', async () => {
+    vi.stubGlobal('fetch', async () => new Response(JSON.stringify({ choices: [{ message: { content: '' }, finish_reason: 'length' }], usage: { prompt_tokens: 1, completion_tokens: 500 } }), { status: 200 }))
+    await expect(chat(cfg, { messages: [{ role: 'user', content: 'x' }], maxTokens: 500 })).rejects.toThrow(/빈 답/)
+  })
+
   it('turns HTTP errors into readable messages', async () => {
     vi.stubGlobal('fetch', async () => new Response('nope', { status: 401 }))
     await expect(chat(cfg, { messages: [{ role: 'user', content: 'x' }] })).rejects.toThrow(/401/)
