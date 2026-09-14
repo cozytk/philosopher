@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ProviderId } from '@/types'
 import { useStore } from '@/store/useStore'
 import { beginOpenRouterLogin } from '@/llm/pkce'
-import { fetchModels, pickDefaultModel, type ModelInfo } from '@/llm/models'
+import { PREFERRED_MODELS, fetchModels, pickDefaultModel, type ModelInfo } from '@/llm/models'
 import { testConnection } from '@/llm/client'
 import { formatUsd } from '@/llm/cost'
 import { Icon } from './icons'
@@ -40,6 +40,8 @@ export function ProviderSetup({ compact = false }: { compact?: boolean }) {
       }
       if (!auto) toast(`${list.length}개의 모델을 불러왔어요.`, 'success')
     } catch (e) {
+      // Catalog unavailable (offline, blocked): fall back to a sensible default id so the app stays usable.
+      if (!llm.model && PREFERRED_MODELS[llm.provider][0]) setLlm({ model: PREFERRED_MODELS[llm.provider][0] })
       if (!auto) toast(e instanceof Error ? e.message : String(e), 'error')
     } finally {
       setLoading(false)

@@ -16,6 +16,7 @@ import type {
   ValuesResult,
 } from '@/types'
 import { scoreAll } from '@/engine/scoring'
+import { buildSampleAnswers, buildSampleCheckins, buildSampleJoyLogs, buildSampleSnapshots, buildSampleValues } from '@/content/sample'
 import { dayKey, nowIso } from '@/lib/dates'
 import type { ChatUsage } from '@/llm/client'
 
@@ -80,6 +81,8 @@ export interface StoreState extends PersistedState {
   exportData: () => ExportBundle
   importData: (bundle: ExportBundle, mode: 'replace' | 'merge') => void
   resetAll: () => void
+  /** Fill the workshop with clearly-labelled example data (kept separate from real answers by id). */
+  loadSample: () => void
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -294,6 +297,23 @@ export const useStore = create<StoreState>()(
         }),
 
       resetAll: () => setState({ ...emptyState() }),
+
+      loadSample: () =>
+        setState((s) => {
+          const answers = { ...buildSampleAnswers(), ...s.answers }
+          const overall = scoreAll(answers)
+          const snapshots = s.snapshots.length >= 2 ? s.snapshots : buildSampleSnapshots(overall.index, Object.fromEntries(overall.domains.map((d) => [d.domainId, d.score])))
+          const seenJoy = new Set(s.joyLogs.map((l) => l.id))
+          const seenChk = new Set(s.checkins.map((c) => c.id))
+          return {
+            answers,
+            joyLogs: [...s.joyLogs, ...buildSampleJoyLogs().filter((l) => !seenJoy.has(l.id))],
+            checkins: [...s.checkins, ...buildSampleCheckins().filter((c) => !seenChk.has(c.id))].sort((a, b) => a.at.localeCompare(b.at)),
+            valuesResult: s.valuesResult ?? buildSampleValues(),
+            snapshots,
+            settings: { ...s.settings, onboarded: true },
+          }
+        }),
     }),
     {
       name: STORAGE_KEY,

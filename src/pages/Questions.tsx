@@ -19,7 +19,7 @@ export default function QuestionsPage() {
           return (
             <Link key={d.id} to={`/questions/${d.id}`} className="card group flex flex-col gap-3 p-4 transition-colors hover:border-accent/40">
               <div className="flex items-start gap-3">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-paper-3 font-serif text-xl text-ink-2 group-hover:bg-accent-soft group-hover:text-accent-ink">{d.glyph}</span>
+                <span className={'grid h-11 w-11 shrink-0 place-items-center rounded-lg font-serif text-xl ' + (ds.status === 'achievement' ? 'seal' : 'bg-paper-3 text-ink-2 group-hover:bg-accent-soft group-hover:text-accent-ink')}>{d.glyph}</span>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-serif text-base font-semibold">{d.name}</span>

@@ -149,7 +149,7 @@ export default function HomePage() {
               const nextQ = ds.nextLevel ? QUESTIONS.find((q) => q.domainId === d.id && q.level === ds.nextLevel) : undefined
               return (
                 <Link key={d.id} to={`/questions/${d.id}`} className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1 px-4 py-3 transition-colors hover:bg-paper-3/50 md:grid-cols-[auto_150px_1fr_auto_auto] md:gap-x-4">
-                  <span className="grid h-9 w-9 place-items-center rounded-lg bg-paper-3 font-serif text-lg text-ink-2">{d.glyph}</span>
+                  <span className={'grid h-9 w-9 place-items-center rounded-lg font-serif text-lg ' + (ds.status === 'achievement' ? 'seal' : 'bg-paper-3 text-ink-2')} title={ds.status === 'achievement' ? '입장 확립 — 낙관' : undefined}>{d.glyph}</span>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{d.name}</span>

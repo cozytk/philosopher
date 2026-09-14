@@ -15,6 +15,7 @@ export default function SettingsPage() {
   const exportData = useStore((s) => s.exportData)
   const importData = useStore((s) => s.importData)
   const resetAll = useStore((s) => s.resetAll)
+  const loadSample = useStore((s) => s.loadSample)
   const toast = useToast()
   const fileRef = useRef<HTMLInputElement>(null)
   const [pending, setPending] = useState<ExportBundle | null>(null)
@@ -127,6 +128,12 @@ export default function SettingsPage() {
             <button type="button" className="btn-secondary" onClick={() => fileRef.current?.click()}><Icon name="upload" size={14} /> 가져오기</button>
             <input ref={fileRef} type="file" accept="application/json" className="hidden" onChange={onFile} />
             <button type="button" className="btn-ghost text-bad" onClick={() => setConfirmReset(true)}><Icon name="trash" size={14} /> 모두 지우기</button>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
+            <button type="button" className="btn-ghost" onClick={() => { loadSample(); toast('예시 기록을 채웠어요. 모든 예시에는 ‘(예시)’ 표시가 붙어 있어요.', 'success') }}>
+              <Icon name="sparkles" size={14} /> 예시 기록 채워보기
+            </button>
+            <span className="text-[11px] text-ink-4">지도와 도구가 채워진 모습을 먼저 보고 싶을 때. 실제 답과 섞이지 않게 표시됩니다.</span>
           </div>
         </div>
       </section>

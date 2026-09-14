@@ -32,7 +32,7 @@ export default function DomainPage() {
       </Link>
       <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="flex items-start gap-4">
-          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-paper-3 font-serif text-2xl text-ink-2">{domain.glyph}</span>
+          <span className={'grid h-14 w-14 shrink-0 place-items-center rounded-xl font-serif text-2xl ' + (ds.status === 'achievement' ? 'seal' : 'bg-paper-3 text-ink-2')}>{domain.glyph}</span>
           <div>
             <div className="flex items-center gap-2">
               <h1 className="h-serif text-2xl">{domain.name}</h1>

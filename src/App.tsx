@@ -55,7 +55,14 @@ function Gate() {
   const [slow, setSlow] = useState(false)
   useEffect(() => {
     const t = window.setTimeout(() => setSlow(true), 1500)
-    return () => window.clearTimeout(t)
+    // If storage is blocked (private mode, sandboxed preview), keep the app usable without persistence.
+    const fallback = window.setTimeout(() => {
+      if (!useStore.getState().hydrated) useStore.getState().setHydrated(true)
+    }, 4000)
+    return () => {
+      window.clearTimeout(t)
+      window.clearTimeout(fallback)
+    }
   }, [])
   if (!hydrated) {
     return (

@@ -8,6 +8,7 @@ import { Icon } from '@/ui/icons'
 export default function OnboardingPage() {
   const navigate = useNavigate()
   const updateSettings = useStore((s) => s.updateSettings)
+  const loadSample = useStore((s) => s.loadSample)
   const displayName = useStore((s) => s.settings.displayName)
   const [step, setStep] = useState(0)
   const [name, setName] = useState(displayName ?? '')
@@ -114,6 +115,7 @@ export default function OnboardingPage() {
             <div className="flex gap-2">
               <button type="button" className="btn-secondary" onClick={() => setStep(2)}>이전</button>
               <button type="button" className="btn-ghost" onClick={() => finish('/')}>지도부터 둘러보기</button>
+              <button type="button" className="btn-ghost" onClick={() => { updateSettings({ displayName: name.trim() || undefined }); loadSample(); navigate('/') }}>예시 기록으로 먼저 둘러보기</button>
             </div>
           </div>
         )}

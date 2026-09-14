@@ -6,51 +6,57 @@
    Light is the base; dark redefines the same roles. */
 :root {
   color-scheme: light;
-  --paper: #f7f4ed;
-  --paper-2: #fdfcf9;
-  --paper-3: #efe9dd;
-  --paper-4: #e6dfd0;
-  --ink: #1d1b16;
-  --ink-2: #4a463d;
-  --ink-3: #7d786c;
-  --ink-4: #a8a396;
-  --line: #e3ddd0;
-  --line-2: #cfc7b6;
-  --accent: #b9471f;
-  --accent-2: #d9822b;
-  --accent-soft: #f6e4da;
-  --accent-ink: #7a2c11;
-  --lens: #1f6f6b;
-  --lens-soft: #dcecea;
-  --lens-ink: #134c49;
+  /* Paper with a faint celadon (청자) cast — chosen, not default cream. */
+  --paper: #f2f4f0;
+  --paper-2: #fafbf9;
+  --paper-3: #e8ece5;
+  --paper-4: #dce2d8;
+  --ink: #1a1d1b;
+  --ink-2: #434a45;
+  --ink-3: #6b736d;
+  --ink-4: #98a199;
+  --line: #d8ded6;
+  --line-2: #c0c9bf;
+  /* 쪽빛 indigo: the reader's own voice, stances, primary actions. */
+  --accent: #2f4f8f;
+  --accent-2: #4a6db3;
+  --accent-soft: #e1e7f4;
+  --accent-ink: #1f3562;
+  /* 감 persimmon: other people's perspectives (lenses). */
+  --lens: #b4621f;
+  --lens-soft: #f5e6d5;
+  --lens-ink: #7a4212;
+  /* 낙관 seal red: a domain where a stance stands. */
+  --seal: #b8382b;
   --good: #2f7d4f;
   --good-soft: #dff0e4;
   --warn: #9a6b00;
   --warn-soft: #f7ecc9;
   --bad: #b3261e;
   --bad-soft: #f9dcd9;
-  --shadow: 0 1px 2px rgb(29 27 22 / 0.05), 0 8px 24px -12px rgb(29 27 22 / 0.18);
+  --shadow: 0 1px 2px rgb(26 29 27 / 0.05), 0 8px 24px -12px rgb(26 29 27 / 0.18);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --paper: #16150f;
-    --paper-2: #1e1d16;
-    --paper-3: #26241c;
-    --paper-4: #302d23;
-    --ink: #ece7db;
-    --ink-2: #c8c1b1;
-    --ink-3: #97917f;
-    --ink-4: #6b665a;
-    --line: #2e2b22;
-    --line-2: #423e31;
-    --accent: #e5804f;
-    --accent-2: #f0a35c;
-    --accent-soft: #3a2418;
-    --accent-ink: #f3c3a6;
-    --lens: #4fb3ad;
-    --lens-soft: #16302f;
-    --lens-ink: #a8e0dc;
+    --paper: #131614;
+    --paper-2: #1b1f1c;
+    --paper-3: #232825;
+    --paper-4: #2d332f;
+    --ink: #e8ebe7;
+    --ink-2: #c3c9c3;
+    --ink-3: #8e968f;
+    --ink-4: #656d66;
+    --line: #2b312d;
+    --line-2: #3d453f;
+    --accent: #8fa9e0;
+    --accent-2: #a9bde8;
+    --accent-soft: #1f2a40;
+    --accent-ink: #c9d6f2;
+    --lens: #e0955a;
+    --lens-soft: #33241a;
+    --lens-ink: #f2c9a6;
+    --seal: #d9564a;
     --good: #5fbf82;
     --good-soft: #17301f;
     --warn: #d9a83a;
@@ -62,23 +68,24 @@
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --paper: #16150f;
-  --paper-2: #1e1d16;
-  --paper-3: #26241c;
-  --paper-4: #302d23;
-  --ink: #ece7db;
-  --ink-2: #c8c1b1;
-  --ink-3: #97917f;
-  --ink-4: #6b665a;
-  --line: #2e2b22;
-  --line-2: #423e31;
-  --accent: #e5804f;
-  --accent-2: #f0a35c;
-  --accent-soft: #3a2418;
-  --accent-ink: #f3c3a6;
-  --lens: #4fb3ad;
-  --lens-soft: #16302f;
-  --lens-ink: #a8e0dc;
+  --paper: #131614;
+  --paper-2: #1b1f1c;
+  --paper-3: #232825;
+  --paper-4: #2d332f;
+  --ink: #e8ebe7;
+  --ink-2: #c3c9c3;
+  --ink-3: #8e968f;
+  --ink-4: #656d66;
+  --line: #2b312d;
+  --line-2: #3d453f;
+  --accent: #8fa9e0;
+  --accent-2: #a9bde8;
+  --accent-soft: #1f2a40;
+  --accent-ink: #c9d6f2;
+  --lens: #e0955a;
+  --lens-soft: #33241a;
+  --lens-ink: #f2c9a6;
+  --seal: #d9564a;
   --good: #5fbf82;
   --good-soft: #17301f;
   --warn: #d9a83a;
@@ -89,8 +96,9 @@
 }
 
 @theme inline {
-  --font-sans: "Noto Sans KR", "Pretendard", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  --font-serif: "Noto Serif KR", "Apple SD Gothic Neo", Georgia, "Times New Roman", serif;
+  --font-sans: "IBM Plex Sans KR", "Pretendard", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-serif: "Hahmlet", "Noto Serif KR", "Apple SD Gothic Neo", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --color-paper: var(--paper);
   --color-paper-2: var(--paper-2);
   --color-paper-3: var(--paper-3);
@@ -108,6 +116,7 @@
   --color-lens: var(--lens);
   --color-lens-soft: var(--lens-soft);
   --color-lens-ink: var(--lens-ink);
+  --color-seal: var(--seal);
   --color-good: var(--good);
   --color-good-soft: var(--good-soft);
   --color-warn: var(--warn);
@@ -133,6 +142,8 @@ body {
 @utility card { @apply bg-paper-2 border border-line rounded-[var(--radius-card)] shadow-card; }
 @utility btn { @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors select-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer; }
 .btn-primary { @apply btn bg-accent text-white hover:bg-accent-ink; }
+/* 낙관 — a small red seal used for the glyph of a domain where a stance stands. */
+.seal { @apply bg-seal text-white; box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.35), 0 1px 2px rgb(0 0 0 / 0.15); transform: rotate(-3deg); }
 .btn-secondary { @apply btn bg-paper-3 text-ink hover:bg-paper-4 border border-line; }
 .btn-ghost { @apply btn text-ink-2 hover:bg-paper-3; }
 .btn-lens { @apply btn bg-lens-soft text-lens-ink hover:bg-lens hover:text-white; }
