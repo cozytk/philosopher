@@ -1,6 +1,7 @@
 # Runs the live OpenRouter checks (src/llm/live.test.ts) on a runner with internet access.
-# The key is taken from a dispatch input, masked in logs, and never written to the repo.
-# Delete the workflow run afterwards if you do not want the input kept in run history.
+# The key comes from the repository secret OPENROUTER_API_KEY, which GitHub masks everywhere:
+#   gh secret set OPENROUTER_API_KEY -R cozytk/philosopher
+# Never pass keys as workflow inputs: GitHub prints step env blocks in the log before any mask applies.
 name: LLM live check
 
 on:
@@ -10,9 +11,6 @@ on:
         description: 'OpenRouter model id'
         required: true
         default: 'deepseek/deepseek-v4.1-flash'
-      api_key:
-        description: 'OpenRouter API key (masked in logs)'
-        required: true
 
 jobs:
   live:
@@ -24,12 +22,16 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Mask the key in logs
+      - name: Require the secret
         env:
-          KEY: ${{ inputs.api_key }}
-        run: echo "::add-mask::$KEY"
+          HAS_KEY: ${{ secrets.OPENROUTER_API_KEY != '' }}
+        run: |
+          if [ "$HAS_KEY" != "true" ]; then
+            echo "::error::Repository secret OPENROUTER_API_KEY is not set. Run: gh secret set OPENROUTER_API_KEY -R ${{ github.repository }}"
+            exit 1
+          fi
       - name: Live tests
         env:
-          OPENROUTER_API_KEY: ${{ inputs.api_key }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENROUTER_MODEL: ${{ inputs.model }}
         run: npx vitest run src/llm/live.test.ts --reporter=verbose
