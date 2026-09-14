@@ -9,6 +9,9 @@ import { fetchModels } from './models'
  * Run locally:  OPENROUTER_API_KEY=… OPENROUTER_MODEL=… npx vitest run src/llm/live.test.ts
  * Or dispatch the "LLM live check" workflow on GitHub.
  */
+// Vitest runs on Node; the app tsconfig deliberately has no Node globals.
+declare const process: { env: Record<string, string | undefined> }
+
 const KEY = process.env.OPENROUTER_API_KEY
 const MODEL = process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4.1-flash'
 const live = KEY ? describe : describe.skip
