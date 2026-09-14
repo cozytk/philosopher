@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+/* ── Theme tokens ─────────────────────────────────────────────────────────
+   A study-room palette: warm paper, ink, one persimmon accent for the
+   reader's own voice, one teal accent for other people's perspectives (lenses).
+   Light is the base; dark redefines the same roles. */
+:root {
+  color-scheme: light;
+  /* Paper with a faint celadon (청자) cast — chosen, not default cream. */
+  --paper: #f2f4f0;
+  --paper-2: #fafbf9;
+  --paper-3: #e8ece5;
+  --paper-4: #dce2d8;
+  --ink: #1a1d1b;
+  --ink-2: #434a45;
+  --ink-3: #6b736d;
+  --ink-4: #98a199;
+  --line: #d8ded6;
+  --line-2: #c0c9bf;
+  /* 쪽빛 indigo: the reader's own voice, stances, primary actions. */
+  --accent: #2f4f8f;
+  --accent-2: #4a6db3;
+  --accent-soft: #e1e7f4;
+  --accent-ink: #1f3562;
+  /* 감 persimmon: other people's perspectives (lenses). */
+  --lens: #b4621f;
+  --lens-soft: #f5e6d5;
+  --lens-ink: #7a4212;
+  /* 낙관 seal red: a domain where a stance stands. */
+  --seal: #b8382b;
+  --good: #2f7d4f;
+  --good-soft: #dff0e4;
+  --warn: #9a6b00;
+  --warn-soft: #f7ecc9;
+  --bad: #b3261e;
+  --bad-soft: #f9dcd9;
+  --shadow: 0 1px 2px rgb(26 29 27 / 0.05), 0 8px 24px -12px rgb(26 29 27 / 0.18);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #131614;
+    --paper-2: #1b1f1c;
+    --paper-3: #232825;
+    --paper-4: #2d332f;
+    --ink: #e8ebe7;
+    --ink-2: #c3c9c3;
+    --ink-3: #8e968f;
+    --ink-4: #656d66;
+    --line: #2b312d;
+    --line-2: #3d453f;
+    --accent: #8fa9e0;
+    --accent-2: #a9bde8;
+    --accent-soft: #1f2a40;
+    --accent-ink: #c9d6f2;
+    --lens: #e0955a;
+    --lens-soft: #33241a;
+    --lens-ink: #f2c9a6;
+    --seal: #d9564a;
+    --good: #5fbf82;
+    --good-soft: #17301f;
+    --warn: #d9a83a;
+    --warn-soft: #33290e;
+    --bad: #e26b63;
+    --bad-soft: #3a1a17;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #131614;
+  --paper-2: #1b1f1c;
+  --paper-3: #232825;
+  --paper-4: #2d332f;
+  --ink: #e8ebe7;
+  --ink-2: #c3c9c3;
+  --ink-3: #8e968f;
+  --ink-4: #656d66;
+  --line: #2b312d;
+  --line-2: #3d453f;
+  --accent: #8fa9e0;
+  --accent-2: #a9bde8;
+  --accent-soft: #1f2a40;
+  --accent-ink: #c9d6f2;
+  --lens: #e0955a;
+  --lens-soft: #33241a;
+  --lens-ink: #f2c9a6;
+  --seal: #d9564a;
+  --good: #5fbf82;
+  --good-soft: #17301f;
+  --warn: #d9a83a;
+  --warn-soft: #33290e;
+  --bad: #e26b63;
+  --bad-soft: #3a1a17;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+}
+
+@theme inline {
+  --font-sans: "IBM Plex Sans KR", "Pretendard", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-serif: "Hahmlet", "Noto Serif KR", "Apple SD Gothic Neo", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-paper-3: var(--paper-3);
+  --color-paper-4: var(--paper-4);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-lens: var(--lens);
+  --color-lens-soft: var(--lens-soft);
+  --color-lens-ink: var(--lens-ink);
+  --color-seal: var(--seal);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --shadow-card: var(--shadow);
+  --radius-card: 14px;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────── */
+html { -webkit-text-size-adjust: 100%; }
+body {
+  @apply bg-paper text-ink font-sans antialiased;
+  font-feature-settings: "ss01", "kern";
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+::selection { background: color-mix(in oklab, var(--accent) 25%, transparent); }
+*:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* ── Reusable primitives ──────────────────────────────────────────────── */
+@utility card { @apply bg-paper-2 border border-line rounded-[var(--radius-card)] shadow-card; }
+@utility btn { @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors select-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer; }
+.btn-primary { @apply btn bg-accent text-white hover:bg-accent-ink; }
+/* 낙관 — a small red seal used for the glyph of a domain where a stance stands. */
+.seal { @apply bg-seal text-white; box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.35), 0 1px 2px rgb(0 0 0 / 0.15); transform: rotate(-3deg); }
+.btn-secondary { @apply btn bg-paper-3 text-ink hover:bg-paper-4 border border-line; }
+.btn-ghost { @apply btn text-ink-2 hover:bg-paper-3; }
+.btn-lens { @apply btn bg-lens-soft text-lens-ink hover:bg-lens hover:text-white; }
+@utility chip { @apply inline-flex items-center gap-1 rounded-full border border-line bg-paper-2 px-2.5 py-0.5 text-xs text-ink-2; }
+@utility input { @apply w-full rounded-lg border border-line bg-paper-2 px-3 py-2 text-sm text-ink placeholder:text-ink-4 focus:border-accent focus:outline-none; }
+@utility label { @apply block text-xs font-medium text-ink-3 mb-1; }
+.prose-note { @apply text-sm leading-relaxed text-ink-2; }
+.h-serif { @apply font-serif font-semibold tracking-tight text-ink; }
+.kbd { @apply rounded border border-line-2 bg-paper-3 px-1.5 py-0.5 text-[11px] font-mono text-ink-2; }
+
+/* Writing surface: a quiet textarea that grows with content. */
+.editor {
+  @apply w-full resize-none bg-transparent font-serif text-[17px] leading-[1.85] text-ink outline-none placeholder:text-ink-4;
+  min-height: 14rem;
+}
+
+/* Markdown rendering for the philosophy document and lens notes. */
+.md { @apply text-[15px] leading-relaxed text-ink; }
+.md h1 { @apply font-serif text-2xl font-semibold mt-6 mb-3; }
+.md h2 { @apply font-serif text-xl font-semibold mt-6 mb-2; }
+.md h3 { @apply font-serif text-lg font-semibold mt-4 mb-2; }
+.md p { @apply my-2.5; }
+.md ul { @apply my-2 pl-5 list-disc; }
+.md ol { @apply my-2 pl-5 list-decimal; }
+.md li { @apply my-1; }
+.md blockquote { @apply my-3 border-l-2 border-accent pl-3 text-ink-2 italic; }
+.md hr { @apply my-6 border-line; }
+.md strong { @apply font-semibold; }
+.md code { @apply rounded bg-paper-3 px-1 py-0.5 text-[13px]; }
+
+/* Subtle enter animation for panels. */
+@keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.rise { animation: rise 240ms ease-out both; }
+@media (prefers-reduced-motion: reduce) { .rise { animation: none; } }
+
+/* Thin scrollbars inside panels. */
+.scroll-thin { scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
