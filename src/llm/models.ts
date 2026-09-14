@@ -14,6 +14,8 @@ export interface ModelInfo {
 /** Cheap, capable defaults tried in order until one exists in the provider's catalog. */
 export const PREFERRED_MODELS: Record<ProviderConfig['provider'], string[]> = {
   openrouter: [
+    'deepseek/deepseek-v4.1-flash',
+    'meta/muse-spark-1.3-contributor',
     'openai/gpt-5-mini',
     'google/gemini-2.5-flash',
     'anthropic/claude-haiku-4.5',

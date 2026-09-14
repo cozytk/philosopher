@@ -41,8 +41,7 @@ npm run lint
 
 ### GitHub Pages로 배포
 
-1. 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 설정합니다.
-2. `main`에 푸시하면 `.github/workflows/deploy-pages.yml`이 빌드해 배포합니다. (Actions 탭에서 수동 실행도 가능)
+`main`에 푸시하면 `.github/workflows/deploy-pages.yml`이 빌드해 배포합니다. 워크플로가 Pages를 자동으로 켜도록(`enablement: true`) 되어 있지만, 실패하면 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 한 번 설정해 주세요. (Actions 탭에서 수동 실행도 가능)
 
 ## AI 연결
 
@@ -55,6 +54,10 @@ npm run lint
 | **직접 지정** | OpenAI 호환 엔드포인트의 Base URL(+선택적 키). | Ollama·LM Studio 같은 로컬 모델이면 0원. Ollama는 `OLLAMA_ORIGINS=*`로 실행해야 브라우저에서 접근됩니다. 직접 운영하는 프록시도 연결할 수 있습니다. |
 
 키는 이 브라우저의 저장소에만 남고, 내보내기 파일에는 포함되지 않습니다.
+
+**배포본에 키를 미리 넣어두고 싶다면** 빌드에 키를 넣지 마세요(정적 사이트는 누구나 번들을 읽을 수 있습니다). 대신 한 번만 쓰는 **설정 링크**를 쓰면 됩니다: `https://<배포 주소>/#/settings?or_key=<OpenRouter 키>&model=<모델 id>` (OpenAI 키는 `oa_key`). 앱이 열리면서 키와 모델을 브라우저 저장소에 넣고, 주소에서 즉시 지웁니다.
+
+**실제 모델로 검증하기**: Actions 탭의 **LLM live check** 워크플로를 모델 id와 키를 입력해 실행하면, 러너에서 `src/llm/live.test.ts`가 성찰·대화·철학 초안 호출을 실제로 수행하고 사용량과 비용을 로그에 남깁니다. 키는 로그에서 마스킹되며 저장소에 기록되지 않습니다. 끝나면 실행 기록을 지워도 됩니다.
 
 **“ChatGPT로 로그인(Sign in with ChatGPT)”에 대해.** 2026년 9월 현재 OpenAI는 이 OAuth를 Codex 도구 안에서만 제공하고, 서드파티 앱의 사용 허용 여부는 공식적으로 답하지 않고 있습니다. 그래서 이 앱은 OpenAI를 API 키로만 지원합니다. 제공자 계층(`src/llm/`)은 OpenRouter와 같은 PKCE 흐름을 이미 갖고 있어, OpenAI가 공개 OAuth를 열면 설정 몇 줄로 추가할 수 있습니다. 그 전까지 ChatGPT 구독을 쓰고 싶다면, 본인이 직접 운영하는 OpenAI 호환 프록시를 “직접 지정”으로 연결하는 방법이 있습니다(약관 준수는 본인 책임입니다).
 

@@ -4,7 +4,7 @@ import { Layout } from './ui/Layout'
 import { ToastProvider, useToast } from './ui/toast'
 import { useStore } from './store/useStore'
 import { applyTheme } from './ui/theme'
-import { clearCodeFromUrl, exchangeOpenRouterCode, pendingOpenRouterCode } from './llm/pkce'
+import { clearCodeFromUrl, exchangeOpenRouterCode, pendingConfigHandoff, pendingOpenRouterCode } from './llm/pkce'
 import { Spinner } from './ui/primitives'
 import HomePage from './pages/Home'
 import QuestionsPage from './pages/Questions'
@@ -25,6 +25,15 @@ function OAuthReturn() {
   const setLlm = useStore((s) => s.setLlm)
   const toast = useToast()
   useEffect(() => {
+    const handoff = pendingConfigHandoff()
+    if (handoff) {
+      setLlm({
+        ...(handoff.provider ? { provider: handoff.provider } : {}),
+        ...(handoff.apiKey ? { apiKey: handoff.apiKey, keySource: 'manual' as const } : {}),
+        ...(handoff.model ? { model: handoff.model, modelPrice: undefined } : {}),
+      })
+      toast(handoff.apiKey ? 'API 키와 모델이 연결됐어요. 주소에서 키는 지웠습니다.' : '모델이 설정됐어요.', 'success')
+    }
     const code = pendingOpenRouterCode()
     if (!code) return
     ;(async () => {

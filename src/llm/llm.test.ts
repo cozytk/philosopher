@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { extractJson } from './json'
-import { challengeFor } from './pkce'
+import { challengeFor, pendingConfigHandoff } from './pkce'
 import { chat } from './client'
 import type { ProviderConfig } from '@/types'
 
@@ -18,6 +18,19 @@ describe('pkce', () => {
   it('computes the RFC 7636 S256 challenge', async () => {
     const verifier = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'
     expect(await challengeFor(verifier)).toBe('E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM')
+  })
+
+  it('reads a config handoff from the hash query and strips it from the address', () => {
+    const urls: string[] = []
+    vi.stubGlobal('window', {
+      location: { hash: '#/settings?or_key=abc123&model=x/y&keep=1', pathname: '/app/', search: '' },
+      history: { replaceState: (_s: unknown, _t: string, url: string) => urls.push(url) },
+    })
+    expect(pendingConfigHandoff()).toEqual({ apiKey: 'abc123', provider: 'openrouter', model: 'x/y' })
+    expect(urls[0]).toBe('/app/#/settings?keep=1')
+    vi.stubGlobal('window', { location: { hash: '#/settings', pathname: '/app/', search: '' }, history: { replaceState: () => {} } })
+    expect(pendingConfigHandoff()).toBeNull()
+    vi.unstubAllGlobals()
   })
 })
 

@@ -87,3 +87,29 @@ export function clearCodeFromUrl(): void {
     /* ignore */
   }
 }
+
+/**
+ * One-time configuration handoff through the hash query:
+ *   #/settings?or_key=<OpenRouter key>&model=<model id>   (or oa_key=<OpenAI key>)
+ * Lets a private link pre-configure a deployment without baking a key into the build.
+ * The parameters are removed from the address bar immediately after reading.
+ */
+export function pendingConfigHandoff(): { apiKey?: string; model?: string; provider?: 'openrouter' | 'openai' } | null {
+  try {
+    const hash = window.location.hash
+    const q = hash.indexOf('?')
+    if (q === -1) return null
+    const params = new URLSearchParams(hash.slice(q + 1))
+    const orKey = params.get('or_key') ?? undefined
+    const oaKey = params.get('oa_key') ?? undefined
+    const model = params.get('model') ?? undefined
+    if (!orKey && !oaKey && !model) return null
+    const route = hash.slice(0, q)
+    for (const k of ['or_key', 'oa_key', 'model']) params.delete(k)
+    const rest = params.toString()
+    window.history.replaceState({}, '', window.location.pathname + window.location.search + route + (rest ? '?' + rest : ''))
+    return { apiKey: orKey ?? oaKey, provider: orKey ? 'openrouter' : oaKey ? 'openai' : undefined, model }
+  } catch {
+    return null
+  }
+}
